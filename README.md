@@ -1,4 +1,4 @@
-# 2
+# Bun SQLite ElysiaJS API Example Project
 
 To install dependencies:
 
@@ -9,7 +9,7 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun start
 ```
 
 This project was created using `bun init` in bun v1.1.16. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
