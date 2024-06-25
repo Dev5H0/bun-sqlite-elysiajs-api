@@ -15,18 +15,34 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/api/users/1
+PUT http://localhost:3000/api/users/1/edit/description
 Content-Type: application/json
 
 {
-    "displayname":"5H0",
-    "description":"Hello, World! ",
+    "newData":"Hello, World! "
+}
+
+###
+PUT http://localhost:3000/api/users/1/edit/displayname
+Content-Type: application/json
+
+{
+    "newData":"5H0"
+}
+
+###
+PUT http://localhost:3000/api/users/1/edit/password
+Content-Type: application/json
+
+{
+    "oldPassword":"password123",
+    "newPassword":"MoreSecurePassword_12345"
 }
 
 ### 
-DELETE http://localhost:3000/api/users/9
+DELETE http://localhost:3000/api/users/1
 Content-Type: application/json
 
 {
-    "password":"password"
+    "password":"MoreSecurePassword_12345"
 }

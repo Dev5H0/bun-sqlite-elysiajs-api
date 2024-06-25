@@ -2,16 +2,16 @@ import { describe, expect, it } from 'bun:test'
 import '../src/index'
 import { edenTreaty } from '@elysiajs/eden'
 import type { App } from '../src/index'
-import type { IUser } from '../src/database'
+import type { IUser, IUserFull } from '../src/database/users'
 
 const { api } = edenTreaty<App>('http://localhost:3000')
 
 describe('api/users', async () => {
     const password = 'test-password'
-    const username = 'test-username4'
+    const username = 'test-username'
     const displayname = 'Tester'
     const description = `Line 1 \nTesting... \nLine 3 \n`
-    const userPostData = (await api.users.post({ password, username })).data as IUser
+    const userPostData = (await api.users.post({ password, username })).data as unknown as IUser
     it('Post', async () => {
         expect(userPostData).pass()
     })

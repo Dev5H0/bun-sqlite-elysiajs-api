@@ -8,14 +8,3 @@ export const createDb = ():Database => {
     migrate(db, getMigrations('./database/migrations'))
     return db
 }
-
-export interface IUser {
-    visible:boolean
-    created_at:Date
-    updated_at:Date
-    id:number
-    password:string
-    username:string
-    displayname?:string
-    description?:string
-}

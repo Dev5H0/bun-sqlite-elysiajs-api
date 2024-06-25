@@ -1,58 +1,86 @@
 import { Elysia, t } from 'elysia'
 import { createDb } from './database';
+import { queryUserPost, queryUserPutDescriptionById, queryUserPutDisplaynameById, queryUserGetAll, queryUserGetById, type IUser, queryUserPutPasswordById, queryUserDeleteById, passwordVerifyByUserId } from './database/users';
+import { passwordHash } from './utils';
 
-const TUsername = t.String({ pattern:/^([a-z0-9]+(?:[\-\_][a-z0-9]+)*)$/.source, maxLength:32, minLength:2 }) // t.RegExp(/^([a-z0-9]+(?:[\-\_][a-z0-9]+)*){2,32}$/)
+const TUsername = t.String({ pattern:/^([a-z0-9]+(?:[\-\_][a-z0-9]+)*)$/.source, maxLength:32, minLength:2 }) 
 
 export const routes = new Elysia()
     .decorate('db', createDb())
     .group('/api', (app) => (
-        app.get('/users', (ctx) => { // Returns all users
-            console.log('Getting all users')
-            return ctx.db.query('SELECT * FROM users').all()
-        }).get('/users/:id', (ctx) => { // Returns a user by id
-            const id = ctx.params.id
-            console.log(`Getting a user by id ${id}`)
-            return ctx.db.query(`SELECT * FROM users WHERE id = $id`).get({ $id:id })
+        app.get('/users', (ctx) => { 
+            return ctx.db.query(queryUserGetAll()).all()
+        }).get('/users/:id', (ctx) => {
+            return ctx.db.query(queryUserGetById(ctx.params.id)).get()
         }, {
             params: t.Object({
                 id: t.Numeric(),
-            })
-        }).post('/users', async (ctx) => { // Creates a user
-            console.log(`Creating a user`)
-            return ctx.db.query(`INSERT INTO users (password, username) VALUES ($password, lower($username)) RETURNING *`).get({ $password:await Bun.password.hash(ctx.body.password, 'bcrypt'), $username:ctx.body.username })
+            }),
+        }).post('/users', async (ctx) => { 
+            return await ctx.db.query(await queryUserPost()).get({ $username:ctx.body.username, $password:await passwordHash(ctx.body.password) }) as IUser
         }, {
             body: t.Object({
                 password: t.String(),
                 username: TUsername,
+            }),
+            response: t.Object({
+                created_at: t.String(),
+                id: t.Numeric(),
+                username: TUsername,
             })
-        }).put('/users/:id', (ctx) => { // Edits a user by id
-            const id = ctx.params.id
-            console.log(`Editing user by id ${id}`)
-            return ctx.db.query(`UPDATE users SET displayname = $displayname, description = $description WHERE id = $id RETURNING *`).get({ $id:id, $displayname:ctx.body.displayname, $description:ctx.body.description })
+        }).put('/users/:id/edit/description', (ctx) => {
+            return ctx.db.query(queryUserPutDescriptionById(ctx.params.id)).get({ $description:ctx.body.newData })
         }, {
             params: t.Object({
                 id: t.Numeric(),
             }),
             body: t.Object({
-                displayname: t.String(),
-                description: t.String(),
+                newData: t.String(),
+            })
+        }).put('/users/:id/edit/displayname', (ctx) => {
+            return ctx.db.query(queryUserPutDisplaynameById(ctx.params.id)).get({ $displayname:ctx.body.newData })
+        }, {
+            params: t.Object({
+                id: t.Numeric(),
+            }),
+            body: t.Object({
+                newData: t.String(),
+            })
+        })
+        // .put('/users/:id/edit/username', (ctx) => {
+        //     return ctx.db.query(queryUserPutUsernameById(ctx.params.id)).get({ $username:ctx.body.newData })
+        // }, {
+        //     params: t.Object({
+        //         id: t.Numeric(),
+        //     }),
+        //     body: t.Object({
+        //         newData: t.String(),
+        //     })
+        // })
+        .put('/users/:id/edit/password', async (ctx) => {
+            if (await passwordVerifyByUserId(ctx.db, ctx.body.oldPassword, ctx.params.id)) return await ctx.db.query(queryUserPutPasswordById(ctx.params.id)).get({ $password:await passwordHash(ctx.body.newPassword) })
+        }, {
+            params: t.Object({
+                id: t.Numeric()
+            }),
+            body: t.Object({
+                oldPassword: t.String(),
+                newPassword: t.String(),
             })
         }).delete('/users/:id', async (ctx):Promise<{ success:boolean }> => { // Deletes a user by id using password
-            const id = ctx.params.id
-            console.log(`Deleting user by id ${id}`)
-            const user_password = ctx.db.query(`SELECT password FROM users WHERE id = $id`).get({ $id:id }) as { password:string }
-            const isMatch = await Bun.password.verify(ctx.body.password, user_password.password, 'bcrypt')
-            if (isMatch) {
-                ctx.db.query(`DELETE FROM users WHERE id = $id`).run({ $id:id })
+            if (await passwordVerifyByUserId(ctx.db, ctx.body.password, ctx.params.id)) {
+                ctx.db.query(queryUserDeleteById(ctx.params.id)).run()
                 return { success:true }
-            }
-            return { success:false }
+            } else return { success:false }
         }, {
             params: t.Object({
                 id: t.Numeric(),
             }), 
             body: t.Object({
                 password: t.String(),
+            }),
+            response: t.Object({
+                success: t.Boolean()
             })
         })
     ))
