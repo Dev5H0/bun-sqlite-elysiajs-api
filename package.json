@@ -1,5 +1,5 @@
 {
-  "name": "2",
+  "name": "bun-sqlite-elysiajs-api",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
