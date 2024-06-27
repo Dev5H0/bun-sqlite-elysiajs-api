@@ -1,10 +1,7 @@
-import Database from 'bun:sqlite'
-import { migrate, getMigrations } from 'bun-sqlite-migrations';
+import { PrismaClient } from '@prisma/client'
 
-export const createDb = ():Database => {
+export const createDb = ():PrismaClient => {
     console.log('Initialising Database')
-    const db = new Database('./database/main.sqlite')
-    db.exec('PRAGMA journal_mode = WAL;')
-    migrate(db, getMigrations('./database/migrations'))
+    const db = new PrismaClient()
     return db
 }

@@ -11,11 +11,13 @@ Content-Type: application/json
 
 {
     "password":"password123",
-    "username":"5h0"
+    "username":"5h0",
+    "displayname":"5H0",
+    "description":""
 }
 
 ###
-PUT http://localhost:3000/api/users/1/edit/description
+PUT http://localhost:3000/api/users/1/edit-description
 Content-Type: application/json
 
 {
@@ -23,7 +25,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/api/users/1/edit/displayname
+PUT http://localhost:3000/api/users/1/edit-displayname
 Content-Type: application/json
 
 {
@@ -31,7 +33,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/api/users/1/edit/password
+PUT http://localhost:3000/api/users/1/edit-password
 Content-Type: application/json
 
 {
