@@ -5,12 +5,14 @@
   "devDependencies": {
     "@elysiajs/eden": "^1.0.14",
     "@elysiajs/swagger": "^1.0.5",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "prisma": "^5.16.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@prisma/client": "5.16.0",
     "bun-sqlite-migrations": "^1.0.2",
     "elysia": "^1.0.25"
   },
